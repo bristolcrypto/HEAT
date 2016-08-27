@@ -1,3 +1,6 @@
 [submodule "HElib"]
 	path = HElib
 	url = https://github.com/shaih/HElib
+[submodule "FV-NFLlib"]
+	path = FV-NFLlib
+	url = https://github.com/CryptoExperts/FV-NFLlib
