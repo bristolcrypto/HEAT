@@ -3,6 +3,7 @@
 #include "../API.h"
 #include "params.h"
 #include <nfl.hpp>
+#include <cstdlib>
 
 namespace FV {
 namespace params {
@@ -23,5 +24,16 @@ gauss_t fg_prng_enc(8.0, 128, 1 << 14);
 }
 }  // namespace FV::params
 
-
 #include "FV.hpp"
+
+//template <class T, size_t Align, class... Args>
+//T* alloc_aligned(size_t n, Args&&... args) {
+//  T* ret;
+//  if (posix_memalign((void**)&ret, Align, sizeof(T) * n) != 0) {
+//    throw std::bad_alloc();
+//  }
+//  for (size_t i = 0; i < n; i++) {
+//    new (&ret[i]) T(std::forward<Args>(args)...);
+//  }
+//  return ret;
+//}

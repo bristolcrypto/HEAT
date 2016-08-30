@@ -7,6 +7,9 @@
 
 #include "API-Bridge.h"
 
+using namespace std;
+using namespace FV;
+
 namespace HE {
 
 mpz_class plaintext_modulus_mpz(PLAINTEXT_MODULUS_MPZ);
@@ -20,7 +23,7 @@ bool supports_mpz_encryption = true;
 bool supports_polynomial_encryption = true;
 bool supports_vector_encryption = false;
 
-size_t number_of_polynomial_slots(void* pk) { return poly_t::degree; }
+size_t number_of_polynomial_slots(void* pk) { return params::poly_t::degree; }
 size_t number_of_vector_slots(void* pk) { return 0; }
 
 /**
@@ -36,7 +39,7 @@ int init(void** parameters) {
 int keygen(void* parameters, void** sk, void** pk, void** evk) {
   *sk = (void*)new sk_t();
   *evk = (void*)new evk_t(*((sk_t*)*sk), 32);
-  *pk = (void*)new pk_t(*((sk_t*)*sk), *((evk_t*)*evk), plaintext_modulus_mpz);
+  *pk = (void*)new pk_t(*((sk_t*)*sk), *((evk_t*)*evk));
   return 0;
 }
 
@@ -51,8 +54,6 @@ int encryptInteger(void* pk, void** ciphertext, unsigned long message,
 int encryptInteger(void* pk, void** ciphertext, mpz_class const& message,
                       unsigned long level) {
   pk_t* PK = (pk_t*)pk;
-  using mess_t = Message<mpz_class, plaintext_modulus_mpz>;
-
   mess_t m(message);
   *ciphertext = (void*)new ciphertext_t();
   encrypt(*((ciphertext_t*)*ciphertext), *PK, m);
@@ -115,8 +116,11 @@ int encryptPolynomial(void* pk, void** ciphertext, unsigned long* message_p,
   for (size_t i = 0; i < size; i++) {
     m_v.push_back(message_p[i]);
   }
-  poly_t* m = alloc_aligned<poly_t, 32>(1);
+/*CSV: DELETE THE COMMENTED CODE BELOW*/
+  params::poly_p* m = (params::poly_p*) malloc(sizeof(params::poly_p));
   m->set(m_v.begin(), m_v.end());
+
+//  params::poly_p* m = new params::poly_p(m_v.begin(), m_v.end());
 
   *ciphertext = (void*)new ciphertext_t();
   encrypt_poly(*((ciphertext_t*)*ciphertext), *PK, *m);
@@ -133,8 +137,12 @@ int encryptPolynomial(void* pk, void** ciphertext, mpz_class* message_p,
   for (size_t i = 0; i < size; i++) {
     m_v.push_back(message_p[i]);
   }
-  poly_t* m = alloc_aligned<poly_t, 32>(1);
-  m->set_mpz(m_v.begin(), m_v.end());
+
+/*CSV: DELETE THE COMMENTED CODE BELOW*/
+    params::poly_p* m = (params::poly_p*) malloc(sizeof(params::poly_p));
+    m->set(m_v.begin(), m_v.end());
+
+//  params::poly_p* m = new params::poly_p(m_v.begin(), m_v.end());
 
   *ciphertext = (void*)new ciphertext_t();
   encrypt_poly(*((ciphertext_t*)*ciphertext), *PK, *m);
@@ -160,14 +168,13 @@ int encryptPolynomialWithSK(void* sk, void* pk, void** ciphertext,
 }
 
 /**
- * Decrypt a ciphertext to an integer (unsigned long of mpz_class)
+ * Decrypt a ciphertext to an integer (unsigned long or mpz_class)
  */
 int decryptInteger(void* sk, void* pk, void* ciphertext,
                       unsigned long* message, unsigned long level) {
   pk_t* PK = (pk_t*)pk;
   sk_t* SK = (sk_t*)sk;
   ciphertext_t* c = (ciphertext_t*)ciphertext;
-  using mess_t = Message<unsigned long, plaintext_modulus>;
 
   mess_t m;
   decrypt(m, *SK, *PK, *c);
@@ -179,7 +186,6 @@ int decryptInteger(void* sk, void* pk, void* ciphertext, mpz_class* message,
   pk_t* PK = (pk_t*)pk;
   sk_t* SK = (sk_t*)sk;
   ciphertext_t* c = (ciphertext_t*)ciphertext;
-  using mess_t = Message<mpz_class, plaintext_modulus_mpz>;
 
   mess_t m;
   decrypt(m, *SK, *PK, *c);
