@@ -23,7 +23,7 @@ bool supports_mpz_encryption = true;
 bool supports_polynomial_encryption = true;
 bool supports_vector_encryption = false;
 
-size_t number_of_polynomial_slots(void* pk) { return params::poly_t::degree; }
+size_t number_of_polynomial_slots(void* pk) { return params::poly_p::degree; }
 size_t number_of_vector_slots(void* pk) { return 0; }
 
 /**
@@ -56,7 +56,7 @@ int encryptInteger(void* pk, void** ciphertext, mpz_class const& message,
   pk_t* PK = (pk_t*)pk;
   mess_t m(message);
   *ciphertext = (void*)new ciphertext_t();
-  encrypt(*((ciphertext_t*)*ciphertext), *PK, m);
+  encrypt<pk_t,ciphertext_t,mess_t>(*((ciphertext_t*)*ciphertext), *PK, m);
   return 0;
 }
 
@@ -177,8 +177,8 @@ int decryptInteger(void* sk, void* pk, void* ciphertext,
   ciphertext_t* c = (ciphertext_t*)ciphertext;
 
   mess_t m;
-  decrypt(m, *SK, *PK, *c);
-  *message = m.getValue();
+  decrypt<sk_t,pk_t,ciphertext_t,mess_t>(m, *SK, *PK, *c);
+  *message = m.getValue().get_ui();
   return 0;
 }
 int decryptInteger(void* sk, void* pk, void* ciphertext, mpz_class* message,
@@ -188,7 +188,7 @@ int decryptInteger(void* sk, void* pk, void* ciphertext, mpz_class* message,
   ciphertext_t* c = (ciphertext_t*)ciphertext;
 
   mess_t m;
-  decrypt(m, *SK, *PK, *c);
+  decrypt<sk_t,pk_t,ciphertext_t,mess_t>(m, *SK, *PK, *c);
   *message = m.getValue();
   return 0;
 }
@@ -200,14 +200,13 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
                          unsigned long** message_p, size_t size,
                          unsigned long level) {
   assert(size <= number_of_polynomial_slots(pk));
-  assert(size <= pk_t::poly_t::degree);
   
   pk_t* PK = (pk_t*)pk;
   sk_t* SK = (sk_t*)sk;
   ciphertext_t* c = (ciphertext_t*)ciphertext;
   
-  std::array<mpz_t, pk_t::poly_t::degree> polym;
-  for (size_t i = 0; i < pk_t::poly_t::degree; i++) {
+  std::array<mpz_t, params::poly_p::degree> polym;
+  for (size_t i = 0; i < params::poly_p::degree; i++) {
     mpz_init(polym[i]);
   }
 
@@ -218,7 +217,7 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
     (*message_p)[i] = mpz_get_ui(polym[i]);
   }
 
-  for (size_t i = 0; i < pk_t::poly_t::degree; i++) {
+  for (size_t i = 0; i < params::poly_p::degree; i++) {
     mpz_clear(polym[i]);
   }
   return 0;
@@ -227,14 +226,13 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
                          mpz_class** message_p, size_t size,
                          unsigned long level) {
   assert(size <= number_of_polynomial_slots(pk));
-  assert(size <= pk_t::poly_t::degree);
   
   pk_t* PK = (pk_t*)pk;
   sk_t* SK = (sk_t*)sk;
   ciphertext_t* c = (ciphertext_t*)ciphertext;
   
-  std::array<mpz_t, pk_t::poly_t::degree> polym;
-  for (size_t i = 0; i < pk_t::poly_t::degree; i++) {
+  std::array<mpz_t, params::poly_p::degree> polym;
+  for (size_t i = 0; i < params::poly_p::degree; i++) {
     mpz_init(polym[i]);
   }
 
@@ -245,7 +243,7 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
     (*message_p)[i] = mpz_class(polym[i]);
   }
 
-  for (size_t i = 0; i < pk_t::poly_t::degree; i++) {
+  for (size_t i = 0; i < params::poly_p::degree; i++) {
     mpz_clear(polym[i]);
   }
   return 0;
@@ -295,24 +293,20 @@ int mul(void* pk, void* evk, void** output, void* input1, void* input2,
  */
 int mulByConstant(void* pk, void* evk, void** output, void* input,
                      unsigned long constant, unsigned long level) {
-  using P = pk_t::poly_t;
 
   ciphertext_t* c_in = (ciphertext_t*)input;
-  P* multiplier = alloc_aligned<P, 32>(1, constant);
-  ciphertext_t* c_out = new ciphertext_t((*c_in)*(*multiplier));
+  mess_t multiplier(constant);
+  ciphertext_t* c_out = new ciphertext_t((*c_in) * multiplier);
   *output = (void*)c_out;
-  free(multiplier);
   return 0;
 }
 int mulByConstant(void* pk, void* evk, void** output, void* input,
                      mpz_class const& constant, unsigned long level) {
-  using P = pk_t::poly_t;
 
   ciphertext_t* c_in = (ciphertext_t*)input;
-  P* multiplier = alloc_aligned<P, 32>(1, constant);
-  ciphertext_t* c_out = new ciphertext_t((*c_in)*(*multiplier));
+  mess_t multiplier(constant);
+  ciphertext_t* c_out = new ciphertext_t((*c_in) * multiplier);
   *output = (void*)c_out;
-  free(multiplier);
   return 0;
 }
 
@@ -320,13 +314,13 @@ int mulByConstant(void* pk, void* evk, void** output, void* input,
  * Serialize functions (back and forth)
  */
 // int serialize_parameters  (char* filename, void* parameters);
-int serialize_sk          (const char* filename, void* sk) {
-  sk_t *SK = (sk_t *)sk;
-  std::ofstream file(filename, std::ios::binary);
-  cereal::BinaryOutputArchive oarchive(file);
-  oarchive (*SK);
-  return 0;
-}
+//int serialize_sk          (const char* filename, void* sk) {
+//  sk_t *SK = (sk_t *)sk;
+//  std::ofstream file(filename, std::ios::binary);
+//  cereal::BinaryOutputArchive oarchive(file);
+//  oarchive (*SK);
+//  return 0;
+//}
 // int serialize_evk         (char* filename, void* evk);
 // int serialize_pk          (char* filename, void* pk);
 // int serialize_ciphertext  (char* filename, void* ciphertext);

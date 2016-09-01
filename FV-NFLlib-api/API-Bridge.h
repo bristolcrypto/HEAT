@@ -4,6 +4,7 @@
 #include "params.h"
 #include <nfl.hpp>
 #include <cstdlib>
+#include <array>
 
 namespace FV {
 namespace params {
