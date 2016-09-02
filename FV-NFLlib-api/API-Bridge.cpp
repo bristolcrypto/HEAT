@@ -56,7 +56,8 @@ int encryptInteger(void* pk, void** ciphertext, mpz_class const& message,
   pk_t* PK = (pk_t*)pk;
   mess_t m(message);
   *ciphertext = (void*)new ciphertext_t();
-  encrypt<pk_t,ciphertext_t,mess_t>(*((ciphertext_t*)*ciphertext), *PK, m);
+//  encrypt<pk_t,ciphertext_t,mess_t>(*((ciphertext_t*)*ciphertext), *PK, m);
+  encrypt(*((ciphertext_t*)*ciphertext), *PK, m);
   return 0;
 }
 
@@ -116,11 +117,9 @@ int encryptPolynomial(void* pk, void** ciphertext, unsigned long* message_p,
   for (size_t i = 0; i < size; i++) {
     m_v.push_back(message_p[i]);
   }
-/*CSV: DELETE THE COMMENTED CODE BELOW*/
+
   params::poly_p* m = (params::poly_p*) malloc(sizeof(params::poly_p));
   m->set(m_v.begin(), m_v.end());
-
-//  params::poly_p* m = new params::poly_p(m_v.begin(), m_v.end());
 
   *ciphertext = (void*)new ciphertext_t();
   encrypt_poly(*((ciphertext_t*)*ciphertext), *PK, *m);
@@ -138,11 +137,8 @@ int encryptPolynomial(void* pk, void** ciphertext, mpz_class* message_p,
     m_v.push_back(message_p[i]);
   }
 
-/*CSV: DELETE THE COMMENTED CODE BELOW*/
-    params::poly_p* m = (params::poly_p*) malloc(sizeof(params::poly_p));
-    m->set(m_v.begin(), m_v.end());
-
-//  params::poly_p* m = new params::poly_p(m_v.begin(), m_v.end());
+  params::poly_p* m = (params::poly_p*) malloc(sizeof(params::poly_p));
+  m->set(m_v.begin(), m_v.end());
 
   *ciphertext = (void*)new ciphertext_t();
   encrypt_poly(*((ciphertext_t*)*ciphertext), *PK, *m);
