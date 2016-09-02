@@ -4,7 +4,6 @@
 CXX = g++
 #CXXFLAGS  = -march=native -mtune=native -DNTT_SSE -std=c++11 -funroll-loops -Wall -g -O3 -I../FV-NFLlib	
 # If need arises include paths to "cereal/archives/binary.hpp" and "boost/variant.hpp"
-CXXFLAGS = -march=native -mtune=native -DNTT_SSE -std=c++11 -funroll-loops -Wall -g -O3 -I../FV-NFLlib -I/home/vikka/Downloads/cereal-master/include/ -I/home/vikka/Downloads/boost_1_61_0/
 
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
