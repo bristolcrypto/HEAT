@@ -556,7 +556,7 @@ int testFixedpt() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);
+  prng.seed(0);  //Try prng.seed(time(NULL)) to set different random seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -580,9 +580,16 @@ int testFixedpt() {
   double* messages2 = new double[nb_tests];
   for (unsigned long i = 0; i < nb_tests; i++) {
     messages1[i] =
-        mpz_class(prng.get_f(sizeof(double))).get_d();
+        mpf_class(prng.get_f(sizeof(double))).get_d();
+    if(messages1[i] > 0.5)
+    	messages1[i] -= 1;
+    messages1[i] *= 16;		//Scaling by an arbitrary constant.
     messages2[i] =
-        mpz_class(prng.get_f(sizeof(double))).get_d();
+        mpf_class(prng.get_f(sizeof(double))).get_d();
+    if(messages2[i] > 0.5)
+    	messages2[i] -= 1;
+    messages2[i] *= 16;		//Scaling by an arbitrary constant.
+
   }
 
   // Encrypt

@@ -395,6 +395,8 @@ int decryptFixedpt(void* sk, void* pk, void* ciphertext,
 	  long dg = (long) number_of_polynomial_slots(pk);
 
       (static_cast<FHESecKey *>(sk))->Decrypt(ply, *(static_cast<Ctxt *>(ciphertext)));
+      long p = (static_cast<FHESecKey *>(sk))->getPtxtSpace();
+      PolyRed(ply, ZZ(p), false);
       ply2fltDecode(*message, ply, fplvl, base, dg, dg, fracrep);
 
       return 0;
