@@ -116,7 +116,10 @@ void flt2plyEncode(ZZX& outply, long& fplvl, double& in_fin, double in, long pre
 			return;
 		}
 
-		fplvl = -1*PrecBbase;		// If PreciInt < 0, then this value depends only 'preci' and 'preciInt'.
+		if(fracrep)
+			fplvl = floor(log((1L << ibits)-1)/log(base));
+		else
+			fplvl = -1*PrecBbase;		// If PreciInt < 0, then this value depends only 'preci' and 'preciInt'.
 
 		clear(outply);				// Set all coefficients to 0.
 
