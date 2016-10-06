@@ -632,6 +632,31 @@ int decryptVector(void* sk, void* pk, void* ciphertext,
 
 #endif
 
+
+/**
+ * Deallocate the memory occupied by a ciphertext
+ */
+
+int freeup_ciphertext(void* pk, void* ciphertext)
+{
+
+	delete (static_cast<Ctxt *>(ciphertext));
+	return 0;
+}
+
+/**
+ * Deallocate the memory occupied by parameters generated during HE::init() and HE::keygen()
+ */
+
+int freeup_keys(void* parameters, void* sk, void* pk, void* evk)
+{
+	delete (static_cast<FHESecKey *>(sk));
+	delete (static_cast<const FHEcontext *>(&((static_cast<const FHEPubKey *>(pk))->getContext())));
+	delete (static_cast<const FHEPubKey *>(pk));
+
+	return 0;
+}
+
 /**
  * Serialize functions (back and forth)
  */

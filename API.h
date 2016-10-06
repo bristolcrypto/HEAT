@@ -264,6 +264,30 @@ int mulByConstant(void* pk, void* evk, void** output, void* input,
                      mpz_class const& constant, unsigned long level = 1);
 
 /**
+ * Deallocate the memory occupied by a ciphertext
+ *
+ * @param pk       	  		pointer to the public key
+ * @param ciphertext  		pointer to the ciphertext to be deleted
+ *
+ * @return error code
+ */
+
+int freeup_ciphertext(void* pk, void* ciphertext);
+
+/**
+ * Deallocate the memory occupied by parameters generated during HE::init() and HE::keygen()
+ *
+ * @param parameters        pointer to the parameters
+ * @param sk                pointer to the secret key
+ * @param pk                pointer to the public key
+ * @param evk               pointer to the evaluation key
+ *
+ * @return error code
+ */
+
+int freeup_keys(void* parameters, void* sk, void* pk, void* evk);
+
+/**
  * Serialize functions (back and forth)
  *
  * @param file name

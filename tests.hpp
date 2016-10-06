@@ -127,10 +127,20 @@ int testInteger() {
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
 
+  for(long i=0; i< nb_tests; i++)
+  {
+	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+  }
+
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+
+  HE::freeup_keys(parameters,sk,pk,evk);
 
   return 0;
 }
@@ -263,10 +273,20 @@ int testInteger_polynomial() {
   delete[] polynomials_added;
   delete[] polynomials_added_decrypted;
 
+  for(long i=0; i< nb_tests; i++)
+  {
+	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+  }
+
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+
+  HE::freeup_keys(parameters,sk,pk,evk);
 
   return 0;
 }
@@ -415,10 +435,20 @@ int testInteger_vector() {
   delete[] vectors_multiplied;
   delete[] vectors_multiplied_decrypted;
 
+  for(long i=0; i< nb_tests; i++)
+  {
+	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+  }
+
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+
+  HE::freeup_keys(parameters,sk,pk,evk);
 
   return 0;
 }
@@ -539,10 +569,20 @@ int testInteger_mpz() {
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
 
+  for(long i=0; i< nb_tests; i++)
+  {
+	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+  }
+
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+
+  HE::freeup_keys(parameters,sk,pk,evk);
 
   return 0;
 }
@@ -697,10 +737,20 @@ int testFixedpt() {
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
 
+  for(long i=0; i< nb_tests; i++)
+  {
+	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+  }
+
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+
+  HE::freeup_keys(parameters,sk,pk,evk);
 
   return 0;
 }

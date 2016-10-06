@@ -17,6 +17,8 @@ int main() {
   #endif
 #else
     success |= testFixedpt<10>();
+    success |= testInteger<10>();
+    success |= testInteger_polynomial<10>();
 #endif
 
   return 0;
