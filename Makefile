@@ -1,5 +1,5 @@
 CXX	= g++	# Or use g++-6
-CXXFLAGS= -Wall -O3 -g -std=c++11
+CXXFLAGS= -Wall -O0 -g -std=c++11
 LDFLAGS = -lgmpxx -lgmp 
 PARALLEL= yes
 

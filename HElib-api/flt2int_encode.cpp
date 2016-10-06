@@ -22,18 +22,19 @@ void BbaseDigits(vector<long>& out, long in, long base)
 	return;
 }
 
-/* On input a double values 'in', the values will be rounded off
+/* On input a double value 'in', the value will be rounded off
  * (actually truncated) to the desired precision 'preci'.
  * 'preci' is the number of precision bits for the absolute value (this number must be at most 52 bits, which is the
- * number of significant bits of the mantissa in a double, and also less than two+length(base) many bits less than the length of
+ * number of significant bits of the mantissa in a double, and two+length(base) many bits less than the length of
  * long integers) and does not include the sign bit. 'PreceiInt' is the number of significant bits reserved for the
  * integer part (excluding the sign bit or for the absolute value of the integer part). If PreciInt < 0, then the routine
  * determines an optimal value for this parameter.
  * The rounded off values will be returned in 'in_fin'.
  * If fracrep=1, then the modulus polynomial used for encoding is X^dg+1. The parameter 'base', usually 3,
  * is the base of the balanced-base encoding to be used. The 'outply' contains the "integer encodings"
- * if fracrep=0, else contains the "fractional" encoding polynomials modulo X^dg+1. The parameter 'fplvl' contains
- * the (non-positive) scaling factors that are needed for the "integer" encoding.
+ * if fracrep=0, else contains the "fractional" encoding polynomials modulo X^dg+1.
+ * The parameter 'fplvl' contains the (non-positive) scaling factors that are needed for the "integer" encoding, or contains an upper bound on the degree
+ * of the integer part in case of fractional representation.
  * If fracrep=0, then an error is raised when the degree of the encoding exceeds 'dg'-1. */
 
 void flt2plyEncode(ZZX& outply, long& fplvl, double& in_fin, double in, long preci, long PreciInt, long base, long dg, bool fracrep)
@@ -106,6 +107,12 @@ void flt2plyEncode(ZZX& outply, long& fplvl, double& in_fin, double in, long pre
 			ibits = PreciInt;
 		}
 
+		double z = in_fin;
+		while(fbits < preci-ibits && z != floor(z))
+		{
+			z *= base;
+			fbits++;
+		}
 		PrecBbase = ceil(log(1L << fbits)/log(base));
 		y = pos*in_fin * pow(base,PrecBbase);
 		BbaseDigits(digits, y, base);
@@ -117,7 +124,7 @@ void flt2plyEncode(ZZX& outply, long& fplvl, double& in_fin, double in, long pre
 		}
 
 		if(fracrep)
-			fplvl = floor(log((1L << ibits)-1)/log(base));
+			fplvl = ceil(log((1L << (ibits+1)))/log(base))-1;
 		else
 			fplvl = -1*PrecBbase;		// If PreciInt < 0, then this value depends only 'preci' and 'preciInt'.
 
@@ -157,7 +164,7 @@ void ply2fltDecode(double& out, const ZZX& in, long fplvl, long base, long dg, l
 		return;
 		}
 
-	if(deg(in) > dg-1)
+	if(deg(in) > dg-1 || abs(fplvl) > dg)
 	{
 		cerr << "Error: the number of coefficients exceeds the degree bound." << endl;
 		return;
@@ -165,7 +172,7 @@ void ply2fltDecode(double& out, const ZZX& in, long fplvl, long base, long dg, l
 
 		long finpos=0, iprec=0, fprec=0;			//fprec undefined for "integer encoding."
 		ZZ x = ZZ(0);
-		long degi = fplvl;					//Contains the exact degree of the integer part when fracrep=true.
+		long degi = fplvl;					//Contains an upper bound the degree of the integer part when fracrep=true.
 		RR y;
 
 		if(fracrep)
@@ -255,9 +262,19 @@ long checkPreci(long preci, long PreciInt, double out, double in)
 	long x;
 
 	if( PreciInt < 0)
-		x =  (long)(fabs(out-in) * (1L << (preci-NumBits((long) fabs(out)))));
+	{
+		if(preci >= NumBits((long) fabs(in)))
+			x =  (long)(fabs(out-in) * (1L << (preci-NumBits((long) fabs(in)))));
+		else
+			x =  ((long)(fabs(out-in))) >> (-1 * (preci-NumBits((long) fabs(in))));
+	}
 	else
-		x =  (long)(fabs(out-in) * (1L << (preci-PreciInt)));
+	{
+		if(preci >= PreciInt)
+			x =  (long)(fabs(out-in) * (1L << (preci-PreciInt)));
+		else
+			x =  ((long)(fabs(out-in))) >> (-1 * (preci-PreciInt));
+	}
 
 	return x;
 }

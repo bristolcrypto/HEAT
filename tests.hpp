@@ -5,6 +5,7 @@
 #include <iostream>
 #include "timing.h"
 #include "API.h"
+#include <cmath>
 
 template <unsigned long nb_tests>
 int testInteger() {
@@ -22,7 +23,8 @@ int testInteger() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);
+//  prng.seed(0);
+  prng.seed(time(NULL)); // To set different seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -150,7 +152,8 @@ int testInteger_polynomial() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);
+//  prng.seed(0);
+  prng.seed(time(NULL)); // To set different seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -285,7 +288,8 @@ int testInteger_vector() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);
+//  prng.seed(0);
+  prng.seed(time(NULL)); // To set different seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -435,7 +439,8 @@ int testInteger_mpz() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);
+//  prng.seed(0);
+  prng.seed(time(NULL)); // To set different seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -544,6 +549,27 @@ int testInteger_mpz() {
 
 #ifdef FXPT
 
+#define MAX_PRECISION_DIFF 3 // Make sure that this value is suitably chosen depending upon the values of MAX_PRECISION in params.h files and the input interval.
+
+#define checkPreciMacro(diff,preci, PreciInt, out, in)\
+{\
+	if( (PreciInt) < 0)\
+	{\
+		if( (preci) >= (long) floor(log2((long) fabs(in))+1) )\
+			diff =  (long)(fabs((out)-(in)) * (1L << ((preci)- (long) floor(log2((long) fabs(in))+1) )) );\
+		else\
+			diff =  ((long)(fabs((out)-(in)))) >> (-1* ((preci)- (long) floor(log2((long) fabs(in))+1) )) ;\
+	}\
+	else\
+	{\
+		if( (preci) >= (PreciInt))\
+				diff =  (long)(fabs((out)-(in)) * (1L << ((preci)-(PreciInt))));\
+		else\
+			diff =  ((long)(fabs((out)-(in)))) >> (-1* ((preci)-(PreciInt) )) ;\
+	}\
+}
+
+
 template <unsigned long nb_tests>
 int testFixedpt() {
 
@@ -556,7 +582,8 @@ int testFixedpt() {
   timing t;
 
   gmp_randclass prng(gmp_randinit_default);
-  prng.seed(0);  //Try prng.seed(time(NULL)) to set different random seeds
+//  prng.seed(0);
+  prng.seed(time(NULL)); // To set different seeds
 
   void* parameters = nullptr;
   void* sk = nullptr;
@@ -572,8 +599,6 @@ int testFixedpt() {
   t.start();
   HE::keygen(parameters, &sk, &pk, &evk);
   t.stop("Keygen");
-  // HE::serialize_sk("sk.bin", sk);
-  // std::cout << "serialized?" << std::endl;
 
   // Random messages
   double* messages1 = new double[nb_tests];
@@ -589,7 +614,6 @@ int testFixedpt() {
     if(messages2[i] > 0.5)
     	messages2[i] -= 1;
     messages2[i] *= 16;		//Scaling by an arbitrary constant.
-
   }
 
   // Encrypt
@@ -614,8 +638,11 @@ int testFixedpt() {
 
   // Correctness of decryption
   for (unsigned long i = 0; i < nb_tests; i++) {
-    assert(messages1[i] == messages1_decrypted[i]);
-    assert(messages2[i] == messages2_decrypted[i]);
+	long diff;
+	checkPreciMacro(diff, MAX_PRECISION_DIFF, -1, messages1_decrypted[i], messages1[i]);
+    assert(diff == 0);
+    checkPreciMacro(diff, MAX_PRECISION_DIFF, -1, messages2_decrypted[i], messages2[i]);
+    assert(diff == 0);
   }
 
   // Homomorphic additions
@@ -635,7 +662,9 @@ int testFixedpt() {
   for (unsigned long i = 0; i < nb_tests; i++) {
     HE::decryptFixedpt(sk, pk, ciphertexts_added[i],
                      &(messages_added_decrypted[i]));
-    assert(messages_added_decrypted[i] == messages_added[i]);
+	long diff;
+	checkPreciMacro(diff, MAX_PRECISION_DIFF, -1, messages_added_decrypted[i], messages_added[i]);
+    assert(diff == 0);
   }
 
   // Homomorphic multiplications
@@ -656,7 +685,9 @@ int testFixedpt() {
   for (unsigned long i = 0; i < nb_tests; i++) {
     HE::decryptFixedpt(sk, pk, ciphertexts_multiplied[i],
                      &(messages_multiplied_decrypted[i]));
-    assert(messages_multiplied_decrypted[i] == messages_multiplied[i]);
+	long diff;
+	checkPreciMacro(diff, MAX_PRECISION_DIFF, -1, messages_multiplied_decrypted[i], messages_multiplied[i]);
+    assert(diff == 0);
   }
 
   delete[] messages1;

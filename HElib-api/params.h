@@ -10,7 +10,7 @@
 #endif
 
 #define SECURITY_LEVEL 80
-#define MULTIPLICATIVE_DEPTH 10
+#define MULTIPLICATIVE_DEPTH 20
 
 #define	MAX_PRECISION 8		// precision (in bits) for the absolute value (excludes the sign bit)
 #define FRAC_REP_ON	1	//currently only the "fractional representation" of fixed-point numbers is supported
