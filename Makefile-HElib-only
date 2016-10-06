@@ -1,0 +1,53 @@
+CXX	= g++	# Or use g++-6
+CXXFLAGS= -Wall -O0 -g -std=c++11
+LDFLAGS = -lgmpxx -lgmp 
+PARALLEL= yes
+
+ifeq ($(PARALLEL),yes)
+  CXXFLAGS+= -fopenmp
+  LDFLAGS += -fopenmp
+endif
+
+SOURCES = $(wildcard *.cpp)
+HEADERS = $(wildcard *.h) $(wildcard *.hpp)
+OBJECTS = $(SOURCES:.cpp=.o) 
+
+LIB_HELIB1 = HElib/src/fhe.a
+LIB_HELIB2 = HElib-api/helib.a
+EXEC_HELIB	= main_helib
+#CXXFLAGS_HELIB = -pthread -DFHE_THREADS  -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS -IHElib/src -IHElib-api
+CXXFLAGS_HELIB = -pthread -DFHE_THREADS -IHElib/src -IHElib-api
+#CXXFLAGS_HELIB = -IHElib/src -IHElib-api
+LDFLAGS_HELIB = -L/usr/local/lib -lntl -lgmpxx -lgmp -lm
+
+
+all: $(EXEC_HELIB)_fxpt $(EXEC_HELIB)_binary $(EXEC_HELIB)_ulong
+	rm -rf *.dSYM/
+
+main.o.mpz: $(SOURCES) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -DMPZ -c -o main.o.mpz main.cpp
+
+main.o.binary: $(SOURCES) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -DBINARY -c -o main.o.binary main.cpp
+
+main.o.ulong: $(SOURCES) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c -o main.o.ulong main.cpp
+	
+main.o.fxpt: $(SOURCES) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -DFXPT -c -o main.o.fxpt main.cpp
+	
+$(EXEC_HELIB)_fxpt: main.o.fxpt $(LIB_HELIB1) $(LIB_HELIB2).fxpt Makefile-HElib-only
+	$(CXX) -o $(EXEC_HELIB)_fxpt main.o.fxpt $(LIB_HELIB2).fxpt $(LIB_HELIB1) $(LDFLAGS) $(LDFLAGS_HELIB)
+$(EXEC_HELIB)_binary: main.o.binary $(LIB_HELIB1) $(LIB_HELIB2).binary Makefile
+	$(CXX) -o $(EXEC_HELIB)_binary main.o.binary $(LIB_HELIB2).binary $(LIB_HELIB1) $(LDFLAGS) $(LDFLAGS_HELIB)
+$(EXEC_HELIB)_ulong: main.o.ulong $(LIB_HELIB1) $(LIB_HELIB2).ulong Makefile
+	$(CXX) -o $(EXEC_HELIB)_ulong main.o.ulong $(LIB_HELIB2).ulong $(LIB_HELIB1) $(LDFLAGS) $(LDFLAGS_HELIB)
+
+tests: all
+	./$(EXEC_HELIB)_fxpt
+	./$(EXEC_HELIB)_binary
+	./$(EXEC_HELIB)_ulong
+
+.PHONY: clean 
+clean:
+	rm -rf main.o* $(EXEC_HELIB)* *.o
