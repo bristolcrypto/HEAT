@@ -224,6 +224,7 @@ int decryptInteger(void* sk, void* pk, void* ciphertext,
                       unsigned long* message, unsigned long level) {
 	ZZX ply;
     (static_cast<FHESecKey *>(sk))->Decrypt(ply, *(static_cast<Ctxt *>(ciphertext)));
+    PolyRed(ply,  plaintext_modulus, false);
     *message = conv<unsigned long>(ConstTerm(ply));
 
 	return 0;
@@ -245,6 +246,7 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
   assert(size <= number_of_polynomial_slots(pk));
   ZZX ply;
   (static_cast<FHESecKey *>(sk))->Decrypt(ply, *(static_cast<Ctxt *>(ciphertext)));
+  PolyRed(ply,  plaintext_modulus, false);
   assert((size_t)deg(ply) <= size);
 
   *message_p = new unsigned long[size];
@@ -488,7 +490,7 @@ int mulByConstant(void* pk, void* evk, void** output, void* input,
  */
 int encryptInteger(void* pk, void** ciphertext, unsigned long message,
                       unsigned long level) {
-	  encryptFixedpt(pk, ciphertext, (double) message, level);
+	  assert(false);
 	  return 1;
 }
 
@@ -584,9 +586,7 @@ int encryptPolynomialWithSK(void* sk, void* pk, void** ciphertext,
  */
 int decryptInteger(void* sk, void* pk, void* ciphertext,
                       unsigned long* message, unsigned long level) {
-	  double tmp_message = (double) *message;
-	  decryptFixedpt(sk, pk, ciphertext, &tmp_message, level);
-	  *message = (unsigned long) tmp_message;
+	  assert(false);
 	  return 1;
 }
 
