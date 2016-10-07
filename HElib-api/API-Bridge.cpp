@@ -105,7 +105,7 @@ int encryptInteger(void* pk, void** ciphertext, unsigned long message,
 	(static_cast<const FHEPubKey *>(pk))->Encrypt(*ct,ply);
 	*ciphertext = (void *) ct;
 
-	return 1;
+	return 0;
 }
 
 int encryptInteger(void* pk, void** ciphertext, mpz_class const& message,
@@ -124,7 +124,7 @@ int encryptIntegerWithSK(void* sk, void* pk, void** ciphertext,
 	(static_cast<FHESecKey *>(sk))->Encrypt(*ct,ply);
 	*ciphertext = (void *) ct;
 
-	return 1;
+	return 0;
 }
 
 int encryptIntegerWithSK(void* sk, void* pk, void** ciphertext,
@@ -181,7 +181,7 @@ int encryptPolynomial(void* pk, void** ciphertext, unsigned long* message_p,
 	(static_cast<const FHEPubKey *>(pk))->Encrypt(*ct,ply);
 	*ciphertext = (void *) ct;
 
-	return 1;
+	return 0;
 }
 
 int encryptPolynomial(void* pk, void** ciphertext, mpz_class* message_p,
@@ -206,7 +206,7 @@ int encryptPolynomialWithSK(void* sk, void* pk, void** ciphertext,
 	(static_cast<FHESecKey *>(sk))->Encrypt(*ct,ply);
 	*ciphertext = (void *) ct;
 
-    return 1;
+    return 0;
 }
 
 int encryptPolynomialWithSK(void* sk, void* pk, void** ciphertext,
@@ -224,7 +224,6 @@ int decryptInteger(void* sk, void* pk, void* ciphertext,
                       unsigned long* message, unsigned long level) {
 	ZZX ply;
     (static_cast<FHESecKey *>(sk))->Decrypt(ply, *(static_cast<Ctxt *>(ciphertext)));
-    PolyRed(ply,  plaintext_modulus, false);
     *message = conv<unsigned long>(ConstTerm(ply));
 
 	return 0;
@@ -246,7 +245,6 @@ int decryptPolynomial(void* sk, void* pk, void* ciphertext,
   assert(size <= number_of_polynomial_slots(pk));
   ZZX ply;
   (static_cast<FHESecKey *>(sk))->Decrypt(ply, *(static_cast<Ctxt *>(ciphertext)));
-  PolyRed(ply,  plaintext_modulus, false);
   assert((size_t)deg(ply) <= size);
 
   *message_p = new unsigned long[size];
@@ -347,7 +345,7 @@ int encryptFixedpt(void* pk, void** ciphertext, double message,
   	  (static_cast<const FHEPubKey *>(pk))->Encrypt(*ct,ply);
   	  *ciphertext = (void *) ct;
 
-  	  return 1;
+  	  return 0;
 }
 
 /**
@@ -368,7 +366,7 @@ int encryptFixedptWithSK(void* sk, void* pk, void** ciphertext,
   	  (static_cast<FHESecKey *>(sk))->Encrypt(*ct,ply);
   	  *ciphertext = (void *) ct;
 
-      return 1;
+      return 0;
 }
 
 /**
