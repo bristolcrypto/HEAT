@@ -307,6 +307,30 @@ int mulByConstant(void* pk, void* evk, void** output, void* input,
 }
 
 /**
+ * Deallocate the memory occupied by a ciphertext
+ */
+
+int freeup_ciphertext(void* pk, void* ciphertext)
+{
+
+	delete (static_cast<ciphertext_t *>(ciphertext));
+	return 0;
+}
+
+/**
+ * Deallocate the memory occupied by parameters generated during HE::init() and HE::keygen()
+ */
+
+int freeup_keys(void* parameters, void* sk, void* pk, void* evk)
+{
+	delete (static_cast<pk_t *>(pk));
+	delete (static_cast<evk_t *>(evk));
+	delete (static_cast<sk_t *>(sk));
+
+	return 0;
+}
+
+/**
  * Serialize functions (back and forth)
  */
 // int serialize_parameters  (char* filename, void* parameters);

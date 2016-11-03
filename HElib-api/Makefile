@@ -4,7 +4,7 @@ CXX	= g++ #Else try, g++-6
 
 #CXXFLAGS = -g -O2 -Wfatal-errors -Wshadow -Wall -I/usr/local/include -I../HElib/src -I..
 #CXXFLAGS = -g -O2 -std=c++11 -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS -I../HElib/src -I..
-CXXFLAGS = -g -O2 -std=c++11 -pthread -I../HElib/src -I..
+CXXFLAGS = -g -O0 -std=c++11 -pthread -I../HElib/src -I..
 #CXXFLAGS = -g -O2 -std=c++11 -I../HElib/src -I..
 
 HEADERS = $(wildcard *.h)

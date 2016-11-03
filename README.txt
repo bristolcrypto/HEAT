@@ -2,7 +2,7 @@ This Homomorphic Encryption API library integrates the FV-NFLlib and the HElib h
 
 To compile this HE-API library, execute the following commands in the current directory:
 	./init.sh
-	make
+	make -f Makefile-HElib-only (currently, 'make' runs into error while compiling with FV-NFLlib)
 
 See the "API.h" file for a brief description of the common API. See the "FV-NFLlib-api/params.h" and the "HElib-api/params.h" files to set the parameters to be used by the FV-NFLlib and the HElib libraries, respectively. 
 
