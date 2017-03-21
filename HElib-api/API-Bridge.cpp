@@ -82,13 +82,12 @@ int keygen(void* parameters, void** sk, void** pk, void** evk) {
 
 	  FHESecKey* secretKey = new FHESecKey(*context);
 	  secretKey->GenSecKey(w); // A Hamming-weight-w secret key
+	  addSome1DMatrices(*secretKey); // compute key-switching matrices that we need
 
 	  const FHEPubKey* publicKey = new const FHEPubKey(*secretKey);
 
 	  *sk = (void *) secretKey;
 	  *pk = (void *) publicKey;
-
-	  addSome1DMatrices(*secretKey); // compute key-switching matrices that we need
 
 	  return 0;
 }
