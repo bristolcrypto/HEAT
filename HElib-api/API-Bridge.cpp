@@ -76,6 +76,10 @@ int keygen(void* parameters, void** sk, void** pk, void** evk) {
 	  convert(*ords1, *ords);
 
 	  FHEcontext *context = new FHEcontext(m, p, r, *gens1, *ords1);
+
+	  delete gens; delete gens1;
+	  delete ords; delete ords1;
+
 	  buildModChain(*context, L, c);
 
 	  context->zMStar.printout();
