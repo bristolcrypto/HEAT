@@ -344,3 +344,118 @@ void Test_flt2plyEncode()
 
 	return;
 }
+
+
+/*
+ * This routine encodes a double value by finding the integer coefficients corresponding to the 'n'-th roots of unity. The encoding ring assumed is x^dg+1, where dg is a power of two >= n/2.
+ * The root of unity is chosen to be the canonical value. The other parameters needed for the lattice reduction are also
+ * hardcoded. The routine is MOST EFFECTIVE when -1 <= inR, inI <= 1.
+ */
+void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long dg)
+{
+	ZZ C = ZZ(1) << (preci+3);		// Lattice parameters - heuristic
+	ZZ T  = ZZ(100);				// Lattice parameters - heuristic
+//	double zR = cos((2*M_PI)/(double)n);
+//	double zI = sin((2*M_PI)/(double)n);
+
+	vector<ZZ> A(n,ZZ(0)), B(n,ZZ(0));
+
+	for (long i=0; i<n; i++)
+	{
+		A[i] = RoundToZZ(to_RR(C)* cos((2*M_PI*i)/(double)n));
+		B[i] = RoundToZZ(to_RR(C)* sin((2*M_PI*i)/(double)n));
+	}
+
+	ZZ a = RoundToZZ(to_RR(C)*inR);
+	ZZ b = RoundToZZ(to_RR(C)*inI);
+	Mat<ZZ> M, MT;
+	M.SetDims(n+3,n+1);
+	MT.SetDims(n+1,n+3);
+
+	for (long i=0; i<n; i++)
+	{
+		M[i][i] = ZZ(1);
+		M[n+1][i] = A[i];
+		M[n+2][i] = B[i];
+	}
+	M[n][n] = T;
+	M[n+1][n] = 0-a;
+	M[n+2][n] = 0-b;
+
+
+	MT = transpose(M);
+	ZZ dt;
+	LLL(dt,MT);
+
+	long i=0;
+	while (i<=n && (MT[n][i] != T && MT[n][i]!= 0-T))
+		i+=1;
+  	if (i > n)
+		printf("No desired lattice encoding possible!\n");
+	else
+	{
+        ZZ sig = MT[n][i]/T;
+        outply = ZZX(0L);
+    	for (long j=0; j<n/2; j++)
+    			SetCoeff(outply, j*(dg<<1)/n, sig*MT[j][i]-sig*MT[j+n/2][i]);		// Here we need n<=2*dg.
+	}
+
+	return;
+}
+
+/*
+ * In this routine the encoding polynomial is evaluated at the canonical 2*dg-th rooth of unity.
+ */
+void LatfltDecode(double& outR, double& outI, const ZZX& in, long dg)
+{
+	RR xR(0), xI(0);
+	for (long i=0; i<dg; i++)
+	{
+		xR += to_RR(coeff(in,i))*cos((2*M_PI*i)/(double)(dg <<1));
+		xI += to_RR(coeff(in,i))*sin((2*M_PI*i)/(double)(dg <<1));
+	}
+	outR = to_double(xR);
+	outI = to_double(xI);
+
+	return;
+}
+
+
+void Test_LatfltEncode()
+{
+	ZZX plyEnc;
+	double inR, inI, outR, outI;
+	long nLat, preci, dg, PreciInt=-1;
+
+	cerr << "Input the precision required (in bits): ";
+	cin >> preci;
+
+	cerr << "Input the lattice dimension for lattice reduction: ";
+	cin >> nLat;
+
+	cerr << "Input the degree of the modulus polynomial: ";
+	cin >> dg;
+
+	cerr << "Input the fractional real part: ";
+	cin >> inR;
+
+	cerr << "Input the fractional imaginary part: ";
+	cin >> inI;
+
+	LatfltEncode(nLat, plyEnc, inR, inI, preci, dg);
+
+	cerr << endl << "The polynomial encodings are: " << plyEnc << endl;
+
+	LatfltDecode(outR, outI, plyEnc, dg);
+
+	cerr << endl << "Real part after decoding: " << outR << ",\tImg part after decoding: " << outI << endl;
+
+	long diff = checkPreci(preci, PreciInt, outR, inR);
+	if( diff != 0)
+			cerr << "Real part: decoding precision error. Diff = " << diff << endl;
+	diff = checkPreci(preci, PreciInt, outI, inI);
+	if( diff != 0)
+			cerr << "Img part: decoding precision error. Diff = " << diff << endl;
+
+	return;
+}

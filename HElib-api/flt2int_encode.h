@@ -3,6 +3,8 @@
 
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
+#include <NTL/mat_ZZ.h>
+#include <NTL/LLL.h>
 #include "FHE.h"
 #include "timing.h"
 #include <vector>
@@ -44,6 +46,10 @@ long checkPreci(long preci, long PreciInt, double out, double in);
 
 void Test_flt2plyEncode();
 
+void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long dg);
 
+void LatfltDecode(double& outR, double& outI, const ZZX& in, long dg);
+
+void Test_LatfltEncode();
 
 #endif /* FIXEDPOINT_FLT2INT_ENCODE_H_ */
