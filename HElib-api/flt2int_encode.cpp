@@ -347,16 +347,21 @@ void Test_flt2plyEncode()
 
 
 /*
- * This routine encodes a double value by finding the integer coefficients corresponding to the 'n'-th roots of unity. The encoding ring assumed is x^dg+1, where dg is a power of two >= n/2.
+ * This (HEURISTIC) routine encodes a double value by finding the integer coefficients corresponding to the 'n'-th roots of unity.
+ * The encoding ring assumed is x^dg+1, where dg is a power of two >= n/2. It is observed in practise that the
+ * routine below works best when n=16, 32 or 64 and preci <= 32.
  * The root of unity is chosen to be the canonical value. The other parameters needed for the lattice reduction are also
  * hardcoded. The routine is MOST EFFECTIVE when -1 <= inR, inI <= 1.
  */
 void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long dg)
 {
-	ZZ C = ZZ(1) << (preci+3);		// Lattice parameters - heuristic
+	ZZ C;
+	if(n < 32)
+		C = ZZ(1) << (preci+6);		// Lattice parameters - heuristic
+	else
+		C = ZZ(1) << (preci+3);		// Lattice parameters - heuristic
+
 	ZZ T  = ZZ(100);				// Lattice parameters - heuristic
-//	double zR = cos((2*M_PI)/(double)n);
-//	double zI = sin((2*M_PI)/(double)n);
 
 	vector<ZZ> A(n,ZZ(0)), B(n,ZZ(0));
 
@@ -382,22 +387,22 @@ void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long 
 	M[n+1][n] = 0-a;
 	M[n+2][n] = 0-b;
 
-
 	MT = transpose(M);
 	ZZ dt;
-	LLL(dt,MT);
+	LLL(dt,MT);			// This NTL routine takes basis vectors as row vectors of the input matrix.
+	M = transpose(MT);
 
 	long i=0;
-	while (i<=n && (MT[n][i] != T && MT[n][i]!= 0-T))
+	while (i<=n && (M[n][i] != T && M[n][i]!= 0-T))
 		i+=1;
   	if (i > n)
 		printf("No desired lattice encoding possible!\n");
 	else
 	{
-        ZZ sig = MT[n][i]/T;
+        ZZ sig = M[n][i]/T;
         outply = ZZX(0L);
     	for (long j=0; j<n/2; j++)
-    			SetCoeff(outply, j*(dg<<1)/n, sig*MT[j][i]-sig*MT[j+n/2][i]);		// Here we need n<=2*dg.
+    		SetCoeff(outply, j*(dg<<1)/n, sig*M[j][i]-sig*M[j+n/2][i]);		// Here we need n <= 2*dg.
 	}
 
 	return;
@@ -444,18 +449,16 @@ void Test_LatfltEncode()
 
 	LatfltEncode(nLat, plyEnc, inR, inI, preci, dg);
 
-	cerr << endl << "The polynomial encodings are: " << plyEnc << endl;
-
 	LatfltDecode(outR, outI, plyEnc, dg);
 
 	cerr << endl << "Real part after decoding: " << outR << ",\tImg part after decoding: " << outI << endl;
 
 	long diff = checkPreci(preci, PreciInt, outR, inR);
 	if( diff != 0)
-			cerr << "Real part: decoding precision error. Diff = " << diff << endl;
+			cerr << "Real part: decoding precision error. Scaled Diff = " << diff << endl;
 	diff = checkPreci(preci, PreciInt, outI, inI);
 	if( diff != 0)
-			cerr << "Img part: decoding precision error. Diff = " << diff << endl;
+			cerr << "Img part: decoding precision error. Scaled Diff = " << diff << endl;
 
 	return;
 }
