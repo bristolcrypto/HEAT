@@ -120,12 +120,30 @@ int testInteger() {
     assert(messages_multiplied_decrypted[i] == messages_multiplied[i]);
   }
 
+  // Homomorphic scalar multiplications
+  void** ciphertexts_sc_multiplied = new void* [nb_tests];
+  t.start();
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::mulByConstant(pk, evk, &(ciphertexts_sc_multiplied[i]), ciphertexts1[i],
+    		messages2[i]);
+  }
+  t.stop("Homomorphic Scalar Multiplication", nb_tests);
+
+  // Correctness of scalar multiplication
+  unsigned long* messages_sc_multiplied_decrypted = new unsigned long[nb_tests];
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::decryptInteger(sk, pk, ciphertexts_sc_multiplied[i],
+                     &(messages_sc_multiplied_decrypted[i]));
+    assert(messages_sc_multiplied_decrypted[i] == messages_multiplied[i]);
+  }
+
   delete[] messages1;
   delete[] messages2;
   delete[] messages_added;
   delete[] messages_added_decrypted;
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
+  delete[] messages_sc_multiplied_decrypted;
 
   for(long i=0; i< nb_tests; i++)
   {
@@ -133,12 +151,14 @@ int testInteger() {
 	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_sc_multiplied[i]);
   }
 
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+  delete[] ciphertexts_sc_multiplied;
 
   HE::freeup_keys(parameters,sk,pk,evk);
 
@@ -562,12 +582,30 @@ int testInteger_mpz() {
     assert(messages_multiplied_decrypted[i] == messages_multiplied[i]);
   }
 
+  // Homomorphic scalar multiplications
+  void** ciphertexts_sc_multiplied = new void* [nb_tests];
+  t.start();
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::mulByConstant(pk, evk, &(ciphertexts_sc_multiplied[i]), ciphertexts1[i],
+    		messages2[i]);
+  }
+  t.stop("Homomorphic Scalar Multiplication", nb_tests);
+
+  // Correctness of scalar multiplication
+  mpz_class* messages_sc_multiplied_decrypted = new mpz_class[nb_tests];
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::decryptInteger(sk, pk, ciphertexts_sc_multiplied[i],
+                     &(messages_sc_multiplied_decrypted[i]));
+    assert(messages_sc_multiplied_decrypted[i] == messages_multiplied[i]);
+  }
+
   delete[] messages1;
   delete[] messages2;
   delete[] messages_added;
   delete[] messages_added_decrypted;
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
+  delete[] messages_sc_multiplied_decrypted;
 
   for(long i=0; i< nb_tests; i++)
   {
@@ -575,12 +613,14 @@ int testInteger_mpz() {
 	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_sc_multiplied[i]);
   }
 
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+  delete[] ciphertexts_sc_multiplied;
 
   HE::freeup_keys(parameters,sk,pk,evk);
 
@@ -730,12 +770,34 @@ int testFixedpt() {
     assert(diff == 0);
   }
 
+
+  // Homomorphic scalar multiplications
+  void** ciphertexts_sc_multiplied = new void* [nb_tests];
+  t.start();
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::mulByConstant(pk, evk, &(ciphertexts_sc_multiplied[i]), ciphertexts1[i],
+    		messages2[i]);
+  }
+  t.stop("Homomorphic Scalar Multiplication", nb_tests);
+
+  // Correctness of scalar multiplication
+  double* messages_sc_multiplied_decrypted = new double[nb_tests];
+  for (unsigned long i = 0; i < nb_tests; i++) {
+    HE::decryptFixedpt(sk, pk, ciphertexts_sc_multiplied[i],
+                     &(messages_sc_multiplied_decrypted[i]));
+	long diff;
+	checkPreciMacro(diff, MAX_PRECISION_DIFF, -1, messages_sc_multiplied_decrypted[i], messages_multiplied[i]);
+    assert(diff == 0);
+  }
+
+
   delete[] messages1;
   delete[] messages2;
   delete[] messages_added;
   delete[] messages_added_decrypted;
   delete[] messages_multiplied;
   delete[] messages_multiplied_decrypted;
+  delete[] messages_sc_multiplied_decrypted;
 
   for(long i=0; i< nb_tests; i++)
   {
@@ -743,12 +805,14 @@ int testFixedpt() {
 	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_added[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts_multiplied[i]);
+	  HE::freeup_ciphertext(pk,ciphertexts_sc_multiplied[i]);
   }
 
   delete[] ciphertexts1;
   delete[] ciphertexts2;
   delete[] ciphertexts_added;
   delete[] ciphertexts_multiplied;
+  delete[] ciphertexts_sc_multiplied;
 
   HE::freeup_keys(parameters,sk,pk,evk);
 
