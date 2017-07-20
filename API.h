@@ -260,6 +260,7 @@ int mul(void* pk, void* evk, void** output, void* input1, void* input2,
  */
 int mulByConstant(void* pk, void* evk, void** output, void* input,
                      unsigned long constant, unsigned long level = 1);
+
 int mulByConstant(void* pk, void* evk, void** output, void* input,
                      mpz_class const& constant, unsigned long level = 1);
 
@@ -354,7 +355,7 @@ int decryptFixedpt(void* sk, void* pk, void* ciphertext,
 
 
 int mulByConstant(void* pk, void* evk, void** output, void* input,
-                     double constant, unsigned long level);
+                     double constant, unsigned long level = 1);
 
 
 #endif //FXPT
