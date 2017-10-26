@@ -270,6 +270,8 @@ long checkPreci(long preci, long PreciInt, double out, double in)
 	}
 	else
 	{
+		if (PreciInt < NumBits((long) fabs(in)))
+			PreciInt = NumBits((long) fabs(in));
 		if(preci >= PreciInt)
 			x =  (long)(fabs(out-in) * (1L << (preci-PreciInt)));
 		else
@@ -355,6 +357,8 @@ void Test_flt2plyEncode()
  */
 void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long dg)
 {
+	outply = ZZX(0);				// Ensures that outply is initialised
+
 	ZZ C;
 	if(n < 32)
 		C = ZZ(1) << (preci+6);		// Lattice parameters - heuristic
@@ -414,10 +418,10 @@ void LatfltEncode(long n, ZZX& outply, double inR, double inI, long preci, long 
 void LatfltDecode(double& outR, double& outI, const ZZX& in, long dg)
 {
 	RR xR(0), xI(0);
-	for (long i=0; i<dg; i++)
+	for (long i=0; i<=deg(in); i++)
 	{
-		xR += to_RR(coeff(in,i))*cos((2*M_PI*i)/(double)(dg <<1));
-		xI += to_RR(coeff(in,i))*sin((2*M_PI*i)/(double)(dg <<1));
+		xR += to_RR(coeff(in,i)) * to_RR(cos((2*M_PI*i)/(double)(dg <<1)));
+		xI += to_RR(coeff(in,i)) * to_RR(sin((2*M_PI*i)/(double)(dg <<1)));
 	}
 	outR = to_double(xR);
 	outI = to_double(xI);
