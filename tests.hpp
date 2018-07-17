@@ -607,7 +607,7 @@ int testInteger_mpz() {
   delete[] messages_multiplied_decrypted;
   delete[] messages_sc_multiplied_decrypted;
 
-  for(long i=0; i< nb_tests; i++)
+  for(unsigned long i=0; i< nb_tests; i++)
   {
 	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
@@ -799,7 +799,7 @@ int testFixedpt() {
   delete[] messages_multiplied_decrypted;
   delete[] messages_sc_multiplied_decrypted;
 
-  for(long i=0; i< nb_tests; i++)
+  for(unsigned long i=0; i< nb_tests; i++)
   {
 	  HE::freeup_ciphertext(pk,ciphertexts1[i]);
 	  HE::freeup_ciphertext(pk,ciphertexts2[i]);
