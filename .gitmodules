@@ -4,3 +4,6 @@
 [submodule "FV-NFLlib"]
 	path = FV-NFLlib
 	url = https://github.com/CryptoExperts/FV-NFLlib
+[submodule "HElib-MP"]
+	path = HElib-MP
+	url = https://github.com/tricosset/HElib-MP
